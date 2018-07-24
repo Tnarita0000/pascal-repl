@@ -2,7 +2,8 @@
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, EOF = 'INTEGER', 'PLUS', 'EOF'
+INTEGER, EOF = 'INTEGER', 'EOF'
+PLUS, MINUS = 'PLUS', 'MINUS'
 
 class Token(object):
   def __init__(self, type, value):
@@ -52,6 +53,10 @@ class Interpreter(object):
     # input left to convert into tokens
     if self.pos > len(text) - 1:
       return Token(EOF, None)
+    elif text[self.pos] == ' ':
+      for c in text[self.pos: len(text)]:
+        if c == ' ': self.pos += 1
+        else       : break
 
     # get a character at the position self.pos and decide
     # what token to create based on the single character
@@ -68,14 +73,15 @@ class Interpreter(object):
         current_char += c
         self.pos += 1
 
-      token = Token(INTEGER, int(current_char))
       self.pos += 1
-      return token
+      return Token(INTEGER, int(current_char))
 
     if current_char == '+':
-      token = Token(PLUS, current_char)
       self.pos += 1
-      return token
+      return Token(PLUS, current_char)
+    elif current_char == '-':
+      self.pos +=1
+      return Token(MINUS, current_char)
 
     self.error()
 
@@ -100,7 +106,10 @@ class Interpreter(object):
 
     # we expect the current token to be a '+' token
     op = self.current_token
-    self.eat(PLUS)
+    if op.type == PLUS:
+      self.eat(PLUS)
+    elif op.type == MINUS:
+      self.eat(MINUS)
 
     # we expect the current token to be a single-digit integer
     right = self.current_token
@@ -112,7 +121,11 @@ class Interpreter(object):
     # has been successfully found and the method can just
     # return the result of adding two integers, thus
     # effectively interpreting client input
-    result = left.value + right.value
+    result = None
+    if op.type == PLUS:
+      result = left.value + right.value
+    elif op.type == MINUS:
+      result = left.value - right.value
     return result
 
 
