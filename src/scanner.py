@@ -2,8 +2,10 @@ from enum import Enum
 
 class Token(Enum):
   # operators
-  PLUS       = '+'
-  MINUS      = '-'
+  PLUS           = '+'
+  MINUS          = '-'
+  MULTIPLICATION = '*'
+  DIVISION       = '/'
   # eof
   EOF        = 'EOF'
 

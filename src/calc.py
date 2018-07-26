@@ -76,6 +76,12 @@ class Interpreter(object):
       if self.current_char == '-':
         self.advance()
         return Tokenizer(Token.MINUS, '-')
+      if self.current_char == '*':
+        self.advance()
+        return Tokenizer(Token.MULTIPLICATION, '*')
+      if self.current_char == '/':
+        self.advance()
+        return Tokenizer(Token.DIVISION, '/')
 
       self.error()
     return Tokenizer(EOF, None)
@@ -87,41 +93,35 @@ class Interpreter(object):
     # otherwise raise an exception.
     if self.current_token.type == token_type:
       self.current_token = self.get_next_token()
+      print(self.current_token)
     else:
       self.error()
 
-  def expr(self):
-    """expr -> INTEGER Token.PLUS INTEGER"""
-    # set current token to the first token taken from the input
-    self.current_token = self.get_next_token()
+  def expr(self, left = None):
+    if left is None:
+      left = self.current_token = self.get_next_token()
+      self.eat(left.type)
 
-    # we expect the current token to be a single-digit integer
-    left = self.current_token
-    self.eat(INTEGER)
+    operator = self.current_token
+    self.eat(operator.type)
 
-    # we expect the current token to be a '+' token
-    op = self.current_token
-    if op.type == Token.PLUS:
-      self.eat(Token.PLUS)
-    elif op.type == Token.MINUS:
-      self.eat(Token.MINUS)
-
-    # we expect the current token to be a single-digit integer
     right = self.current_token
-    self.eat(INTEGER)
-    # after the above call the self.current_token is set to
-    # EOF token
+    self.eat(right.type)
 
-    # at this point INTEGER Token.PLUS INTEGER sequence of tokens
-    # has been successfully found and the method can just
-    # return the result of adding two integers, thus
-    # effectively interpreting client input
     result = None
-    if op.type == Token.PLUS:
+    if operator.type == Token.PLUS:
       result = left.value + right.value
-    elif op.type == Token.MINUS:
+    elif operator.type == Token.MINUS:
       result = left.value - right.value
-    return result
+    elif operator.type == Token.MULTIPLICATION:
+      result = left.value * right.value
+    elif operator.type == Token.DIVISION:
+      result = left.value / right.value
+
+    if self.current_char is not None: 
+      return self.expr( Tokenizer(INTEGER, result) )
+    else:
+      return result
 
 
 def main():
