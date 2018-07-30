@@ -8,7 +8,7 @@
 
 #define SIZE 1024
 
-int ch; // '+', '-', '*', '/'
+int ch;
 int token;
 double value;
 jmp_buf err;
@@ -30,6 +30,7 @@ double expression(void);
 double term(void);
 double factor(void);
 
+_Noreturn
 void error(char *mes) {
   fprintf(stderr, "%s, %s\n", mes, token_name[token]);
   longjmp(err, 1);
@@ -163,6 +164,12 @@ double term(void) {
 
 double factor(void) {
   switch (token) {
+    case Add:
+      get_token();
+      return factor();
+    case Sub:
+      get_token();
+      return -factor();
     case Lpar:
       get_token();
       double val = expression();
